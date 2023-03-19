@@ -1,15 +1,16 @@
-import { useContext, useLayoutEffect } from 'react';
+import { useContext, useLayoutEffect,useState } from 'react';
 import {View,Text, StyleSheet} from 'react-native';
 import IconButton from '../components/UI/IconButton';
 //import { GlobalStyles } from '../../ExpenseApp/assets/constants/styles';
 import Button from '../components/UI/Button';
 import { ExpensesContext } from '../assets/store/expenses-context';
 import ExpenseForm from '../components/Manageexpense/ExpenseForm';
-import { storeExpense } from '../assets/utils/http';
+import { storeExpense,updateExpense,deleteExpense } from '../assets/utils/http';
+import LoadinOverlay from '../components/UI/LoadingOverlay';
 
 function ManageExpense({route,navigation}) {
     const context = useContext(ExpensesContext);
-
+    const [IsSubmitting,setIsSubmitting] = useState(false)
 
     const editedExpensedId = route.params?.expenseId;
     console.log("expense ID:" + editedExpensedId);
@@ -28,8 +29,10 @@ function ManageExpense({route,navigation}) {
     },[navigation,isEditing])
 
 
-    function deleteExpenseHandler(){
+    async function deleteExpenseHandler(){
         context.deleteExpense(editedExpensedId);
+        setIsSubmitting(true);
+        await  deleteExpense(editedExpensedId);
         navigation.goBack();
 
     }
@@ -38,18 +41,23 @@ function ManageExpense({route,navigation}) {
        
         navigation.goBack();
     }
-    function confirmHandler(expenseData){
+   async function confirmHandler(expenseData){
+         setIsSubmitting(true);
         if  (isEditing){
             context.updateExpense(editedExpensedId,
                 expenseData);
+                updateExpense(editedExpensedId,expenseData);
         }
         else {
-             storeExpense(expenseData);
-             context.addExpense(expenseData)
+        const id = await storeExpense(expenseData);
+             context.addExpense({...expenseData,id:id});
         }
         navigation.goBack();
     }
     
+    if(IsSubmitting){
+      return  <LoadinOverlay/>
+    }
     return <View style = {styles.container}> 
             <ExpenseForm
             submitButtonLabel={isEditing ? 'Update' : 'Add'}

@@ -1,33 +1,6 @@
 import { createContext, useReducer } from "react";
 
 
-const Dummy_Data = [
-    {
-        id:'e1',
-        description:'A pair of shoes',
-        amount:59.99,
-        date:new Date('2023-03-13')
-    },
-    {
-        id:'e2',
-        description:'food',
-        amount:99,
-        date:new Date('2023-03-7')
-    },
-    {
-        id:'e3',
-        description:'shirt',
-        amount:5.9,
-        date:new Date('2023-03-6')
-    },
-    {
-        id:'e4',
-        description:'cell phone',
-        amount:9.99,
-        date:new Date('2023-03-5')
-    }
-]
-
 
 export const ExpensesContext = createContext({
     expenses:[],
@@ -36,6 +9,7 @@ export const ExpensesContext = createContext({
         amount,
         date
     })=>{},
+    setExpenses:(expenses)=>{},
     deleteExpense:(id)=>{},
     updateExpense:(id,
         {
@@ -47,9 +21,11 @@ export const ExpensesContext = createContext({
 function expensesReducer (state,action){
     switch (action.type){
         case 'ADD':
-            const id = new Date().toString()
-            + Math.random().toString();
-            return [{...action.payload,id:id},...state];
+            
+            return [action.payload,...state];
+        case 'SET':
+            const reversed = action.payload.reverse();
+            return reversed;  
 
         case 'UPDATE':
             // const updatableExpenseIndex = state.findIndex( 
@@ -87,10 +63,13 @@ function expensesReducer (state,action){
 function ExpensesContextProvider ({children}) {
 
  const [expensesState,dispatch] =   
- useReducer(expensesReducer,Dummy_Data);
+ useReducer(expensesReducer,[]);
 
  function addExpense(expenseData){
     dispatch({type : 'ADD',payload:expenseData});
+ }
+ function setExpenses(expenses){
+    dispatch({type:'SET',payload:expenses})
  }
  function deleteExpense (id){
     dispatch({type:'DELETE',payload:id});
@@ -99,8 +78,9 @@ function ExpensesContextProvider ({children}) {
     dispatch ({type:'UPDATE',payload:{id:id,data:expenseData}});
  }
 const value = {
-    expenses:expensesState,
+    expenses:expensesState, 
     addExpense:addExpense,
+    setExpenses:setExpenses,
     deleteExpense:deleteExpense,
     updateExpense:updateExpense
 
