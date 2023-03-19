@@ -43,6 +43,7 @@ function ExpenseOverview() {
         }}
         name= "RecentExpenses" 
         component={RecentExpenses}/>
+        
 
         <BottomTabs.Screen
          options={{
@@ -57,6 +58,7 @@ function ExpenseOverview() {
         }}
          name= "AllExpenses"
           component={AllExpenses}/>
+          
          </BottomTabs.Navigator>)
   
 }
