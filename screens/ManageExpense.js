@@ -7,10 +7,12 @@ import { ExpensesContext } from '../assets/store/expenses-context';
 import ExpenseForm from '../components/Manageexpense/ExpenseForm';
 import { storeExpense,updateExpense,deleteExpense } from '../assets/utils/http';
 import LoadinOverlay from '../components/UI/LoadingOverlay';
+import ErrorOverlay from '../components/UI/ErrorOverlay';
 
 function ManageExpense({route,navigation}) {
     const context = useContext(ExpensesContext);
-    const [IsSubmitting,setIsSubmitting] = useState(false)
+    const [IsSubmitting,setIsSubmitting] = useState(false);
+    const [error,setError] = useState();
 
     const editedExpensedId = route.params?.expenseId;
     console.log("expense ID:" + editedExpensedId);
@@ -30,11 +32,18 @@ function ManageExpense({route,navigation}) {
 
 
     async function deleteExpenseHandler(){
-        context.deleteExpense(editedExpensedId);
+       
         setIsSubmitting(true);
-        await  deleteExpense(editedExpensedId);
-        navigation.goBack();
-
+        try {
+              await  deleteExpense(editedExpensedId);
+              context.deleteExpense(editedExpensedId);
+              navigation.goBack();
+      
+        } catch (error) {
+            setError('Try again later!');
+            setIsSubmitting(false);
+        }
+       
     }
 
     function cancelHandler(){
@@ -43,7 +52,8 @@ function ManageExpense({route,navigation}) {
     }
    async function confirmHandler(expenseData){
          setIsSubmitting(true);
-        if  (isEditing){
+         try {
+             if  (isEditing){
             context.updateExpense(editedExpensedId,
                 expenseData);
                 updateExpense(editedExpensedId,expenseData);
@@ -51,8 +61,23 @@ function ManageExpense({route,navigation}) {
         else {
         const id = await storeExpense(expenseData);
              context.addExpense({...expenseData,id:id});
+             navigation.goBack();
         }
-        navigation.goBack();
+ 
+         } catch (error) {
+            setError('Could not save data');
+         }
+       setIsSubmitting(false);
+       
+    }
+function errorHandler(){
+    setError(null);
+}
+
+
+    if(error && !IsSubmitting){
+        return <ErrorOverlay message={error}
+        onConfirm={errorHandler}/>
     }
     
     if(IsSubmitting){

@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const url = "https://react-native-expens-efeef-default-rtdb.firebaseio.com";
+const url = "https://react-native-expense-efeef-default-rtdb.firebaseio.com";
 
 
 export async function storeExpense(expenseData){
